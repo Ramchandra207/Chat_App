@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+            margin: 0;
+        }
+        .chat-box {
+            background: #fff;
+            width: 350px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        #messages {
+            list-style: none;
+            padding: 0;
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        .sent {
+            background: #007bff;
+            color: white;
+            text-align: right;
+            margin-left: auto;
+        }
+        .received {
+            background: #e0e0e0;
+            text-align: left;
+        }
+        input[type="text"] {
+            width: 75%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-box">
+        <h2>Chat Room - <span id="username"></span></h2>
+        <ul id="messages"></ul>
+        <input id="message" type="text" placeholder="Type a message..." autocomplete="off" />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        const username = "{{ username }}"; // Get username from Flask
+        document.getElementById('username').innerText = username;
+
+        socket.on('message', function(data) {
+            const li = document.createElement('li');
+            li.classList.add('message');
+            li.classList.add(data.username === username ? 'sent' : 'received');
+            li.innerText = data.username + ": " + data.message;
+            document.getElementById('messages').appendChild(li);
+        });
+
+        function sendMessage() {
+            const msg = document.getElementById('message').value;
+            if (msg.trim() !== '') {
+                socket.send({'username': username, 'message': msg});
+                document.getElementById('message').value = '';
+            }
+        }
+    </script>
+</body>
+</html>
